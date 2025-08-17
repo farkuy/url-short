@@ -1,5 +1,5 @@
 env: "local"
-storage_path: "./storage/storage.db"
+storage_path: "user=postgres password=Metro2034! dbname=usl-short sslmode=disable"
 http_server: 
   address: "localhost:8080"
   timeout: 4s

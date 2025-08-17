@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"usr-short/cmd/internal/config"
 	"usr-short/cmd/internal/logger"
+	"usr-short/cmd/internal/storage"
 
 	"github.com/joho/godotenv"
 )
@@ -22,10 +24,12 @@ func main() {
 
 	log := logger.SetupLogger(cfg.ENV)
 
-	log.Debug("Debug")
-	log.Info("Info")
-	log.Warn("Warn")
-	log.Error("Error")
+	storage, err := storage.Start(cfg.STORAGE_PATH)
+	if err != nil {
+		log.Error("Error in data base:", err)
+		os.Exit(1)
+	}
+	fmt.Println(storage)
 
 	fmt.Println(cfg)
 }

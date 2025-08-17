@@ -3,6 +3,8 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -11,25 +13,25 @@ const (
 )
 
 func Start(path string) (*sql.DB, error) {
-	db, error := sql.Open("postgres", path)
-	if error != nil {
-		return nil, fmt.Errorf("Error conncect db: %v", error)
+	db, err := sql.Open("postgres", path)
+	if err != nil {
+		return nil, fmt.Errorf("Error conncect db: %v", err)
 	}
-	if error = db.Ping(); error != nil {
-		return nil, fmt.Errorf("Error ping db: %v", error)
+	if err = db.Ping(); err != nil {
+		return nil, fmt.Errorf("Error ping db: %v", err)
 	}
 
 	var exists bool
-	error = db.QueryRow(ckeckUrlTable).Scan(exists)
-	if error != nil {
-		return nil, fmt.Errorf("Error check row: %v", error)
+	err = db.QueryRow(ckeckUrlTable).Scan(&exists)
+	if err != nil {
+		return nil, fmt.Errorf("Error check row: %v", err)
 	}
 
 	if !exists {
-		_, error := db.Exec(createUrlTable)
+		_, err := db.Exec(createUrlTable)
 
-		if error != nil {
-			return nil, fmt.Errorf("Error create row: %v", error)
+		if err != nil {
+			return nil, fmt.Errorf("Error create row: %v", err)
 		}
 	}
 
