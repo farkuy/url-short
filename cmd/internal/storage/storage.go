@@ -7,30 +7,66 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	checkUrlTable  = "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'url');"
-	createUrlTable = "CREATE TABLE IF NOT EXISTS url (id SERIAL PRIMARY KEY, alias TEXT UNIQUE NOT NULL, originalUrl TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
-)
+type Storage struct {
+	db *sql.DB
+}
 
-func Start(path string) (*sql.DB, error) {
+func Start(path string) (*Storage, error) {
 	db, err := sql.Open("postgres", path)
 	if err != nil {
-		return nil, fmt.Errorf("Error conncect db: %v", err)
+		return nil, fmt.Errorf("error conncect db. %v", err)
 	}
 	if err = db.Ping(); err != nil {
-		return nil, fmt.Errorf("Error ping db: %v", err)
+		return nil, fmt.Errorf("error ping db. %v", err)
 	}
 
 	var exists bool
-	if err = db.QueryRow(checkUrlTable).Scan(&exists); err != nil {
-		return nil, fmt.Errorf("Error check row: %v", err)
+	if err = db.QueryRow(CheckUrlTable).Scan(&exists); err != nil {
+		return nil, fmt.Errorf("error checking table existence. %v", err)
 	}
 
 	if !exists {
-		if _, err = db.Exec(createUrlTable); err != nil {
-			return nil, fmt.Errorf("Ошибка создания таблицы: %v", err)
+		if _, err = db.Exec(CreateUrlTable); err != nil {
+			return nil, fmt.Errorf("error creating table. %v", err)
 		}
 	}
 
-	return db, nil
+	return &Storage{db: db}, nil
+}
+
+func (s *Storage) SaveUrl(alias, longUrl string) error {
+	_, err := s.db.Exec(PostUrlRow, alias, longUrl)
+	if err != nil {
+		return fmt.Errorf("error adding URL (%v) and alias (%v). (%v)", longUrl, alias, err)
+	}
+
+	return nil
+}
+
+func (s *Storage) GetUrl(alias string) (string, error) {
+	var originalUrl string
+	err := s.db.QueryRow(GetUrlRow, alias).Scan(&originalUrl)
+	if err != nil {
+		return "", fmt.Errorf("error get alias (%v). (%v)", alias, err)
+	}
+
+	return originalUrl, nil
+}
+
+func (s *Storage) UpdateUrl(alias, newUrl string) error {
+	_, err := s.db.Exec(UpdateUrlRow, newUrl, alias)
+	if err != nil {
+		return fmt.Errorf("error update alias (%v). %v", alias, err)
+	}
+
+	return nil
+}
+
+func (s *Storage) DeleteUrl(alias string) error {
+	_, err := s.db.Exec(DeleteUrlRow, alias)
+	if err != nil {
+		return fmt.Errorf("error deleting alias (%v). %v", alias, err)
+	}
+
+	return nil
 }
