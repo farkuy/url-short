@@ -21,12 +21,12 @@ func Start(path string) (*Storage, error) {
 	}
 
 	var exists bool
-	if err = db.QueryRow(CheckUrlTable).Scan(&exists); err != nil {
+	if err = db.QueryRow(checkUrlTable).Scan(&exists); err != nil {
 		return nil, fmt.Errorf("error checking table existence. %v", err)
 	}
 
 	if !exists {
-		if _, err = db.Exec(CreateUrlTable); err != nil {
+		if _, err = db.Exec(createUrlTable); err != nil {
 			return nil, fmt.Errorf("error creating table. %v", err)
 		}
 	}
@@ -35,7 +35,7 @@ func Start(path string) (*Storage, error) {
 }
 
 func (s *Storage) SaveUrl(alias, longUrl string) error {
-	_, err := s.db.Exec(PostUrlRow, alias, longUrl)
+	_, err := s.db.Exec(postUrlRow, alias, longUrl)
 	if err != nil {
 		return fmt.Errorf("error adding URL (%v) and alias (%v). (%v)", longUrl, alias, err)
 	}
@@ -45,7 +45,7 @@ func (s *Storage) SaveUrl(alias, longUrl string) error {
 
 func (s *Storage) GetUrl(alias string) (string, error) {
 	var originalUrl string
-	err := s.db.QueryRow(GetUrlRow, alias).Scan(&originalUrl)
+	err := s.db.QueryRow(getUrlRow, alias).Scan(&originalUrl)
 	if err != nil {
 		return "", fmt.Errorf("error get alias (%v). (%v)", alias, err)
 	}
@@ -54,7 +54,7 @@ func (s *Storage) GetUrl(alias string) (string, error) {
 }
 
 func (s *Storage) UpdateUrl(alias, newUrl string) error {
-	_, err := s.db.Exec(UpdateUrlRow, newUrl, alias)
+	_, err := s.db.Exec(updateUrlRow, newUrl, alias)
 	if err != nil {
 		return fmt.Errorf("error update alias (%v). %v", alias, err)
 	}
@@ -63,7 +63,7 @@ func (s *Storage) UpdateUrl(alias, newUrl string) error {
 }
 
 func (s *Storage) DeleteUrl(alias string) error {
-	_, err := s.db.Exec(DeleteUrlRow, alias)
+	_, err := s.db.Exec(deleteUrlRow, alias)
 	if err != nil {
 		return fmt.Errorf("error deleting alias (%v). %v", alias, err)
 	}
