@@ -26,7 +26,7 @@ func main() {
 
 	storage, err := storage.Start(cfg.STORAGE_PATH)
 	if err != nil {
-		log.Error("Error in data base:", err)
+		log.Error("Error to init storage:", err)
 		os.Exit(1)
 	}
 	fmt.Println(storage)
