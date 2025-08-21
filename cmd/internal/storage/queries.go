@@ -17,8 +17,9 @@ const (
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     `
-	postUrlRow   = "INSERT INTO url (alias, originalUrl) VALUES ($1, $2)"
-	getUrlRow    = "SELECT originalUrl FROM url WHERE alias=$1"
-	updateUrlRow = "UPDATE url SET originalUrl=$1 WHERE alias=$2"
-	deleteUrlRow = "DELETE FROM url WHERE alias=$1"
+	postUrlRow    = "INSERT INTO url (alias, originalUrl) VALUES ($1, $2)"
+	getUrlRow     = "SELECT originalUrl FROM url WHERE alias=$1"
+	updateUrlRow  = "UPDATE url SET originalUrl=$1 WHERE alias=$2"
+	deleteUrlRow  = "DELETE FROM url WHERE alias=$1 RETURNING originalUrl"
+	checkAddedUrl = "SELECT EXISTS(SELECT 1 FROM url WHERE originalUrl = $1) AS exists_flag;"
 )

@@ -16,6 +16,7 @@ func Start(path string) (*Storage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error conncect db. %v", err)
 	}
+
 	if err = db.Ping(); err != nil {
 		return nil, fmt.Errorf("error ping db. %v", err)
 	}
@@ -62,11 +63,12 @@ func (s *Storage) UpdateUrl(alias, newUrl string) error {
 	return nil
 }
 
-func (s *Storage) DeleteUrl(alias string) error {
-	_, err := s.db.Exec(deleteUrlRow, alias)
+func (s *Storage) DeleteUrl(alias string) (string, error) {
+	var deletedUrl string
+	err := s.db.QueryRow(deleteUrlRow, alias).Scan(&deletedUrl)
 	if err != nil {
-		return fmt.Errorf("error deleting alias (%v). %v", alias, err)
+		return "", fmt.Errorf("error deleting alias (%v). %v", alias, err)
 	}
 
-	return nil
+	return deletedUrl, nil
 }

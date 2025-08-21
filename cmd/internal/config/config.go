@@ -2,9 +2,11 @@ package config
 
 import (
 	"errors"
+	"log"
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,6 +23,11 @@ type HTTPServer struct {
 }
 
 func LoadConfig() (*Config, error) {
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		log.Fatal("error uploading file local.env", err)
+	}
+
 	localYamlPath := os.Getenv("LOCAL_YAML")
 	if localYamlPath == "" {
 		return nil, errors.New("Path for local.yaml file not found")
