@@ -49,9 +49,14 @@ func SaveUrl(log *slog.Logger, uSaver urlSaver) http.HandlerFunc {
 			return
 		}
 
+		if !utils.ValidateUrl(req.Url) {
+			render.JSON(w, r, model.ERROR("Недопустимый формат url"))
+			return
+		}
+
 		if err = uSaver.SaveUrl(req.Alias, req.Url); err != nil {
 			log.Error(err.Error())
-			render.JSON(w, r, model.ERROR("Произошла ошибка при добавлении"))
+			render.JSON(w, r, model.ERROR(err.Error()))
 			return
 		}
 

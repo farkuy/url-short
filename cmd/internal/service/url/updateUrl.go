@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"usr-short/cmd/internal/model"
+	"usr-short/cmd/internal/utils"
 
 	"github.com/go-chi/render"
 )
@@ -22,8 +23,6 @@ type updateUrl interface {
 	UpdateUrl(alias, newUrl string) error
 }
 
-// TODO: логика если заменяют на тот же самый url
-// TODO: логика проверки существования alias который обновляют
 func UpdateUrl(log *slog.Logger, uUrl updateUrl) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log = log.With(slog.String("handler", "update-url"))
@@ -48,10 +47,15 @@ func UpdateUrl(log *slog.Logger, uUrl updateUrl) http.HandlerFunc {
 			return
 		}
 
+		if !utils.ValidateUrl(req.NewUrl) {
+			render.JSON(w, r, model.ERROR("Недопустимый формат url"))
+			return
+		}
+
 		err = uUrl.UpdateUrl(req.Alias, req.NewUrl)
 		if err != nil {
-			log.Error("Error updating the url ", err)
-			render.JSON(w, r, model.ERROR("Ошибка при обновлении url"))
+			log.Error(err.Error())
+			render.JSON(w, r, model.ERROR(err.Error()))
 			return
 		}
 
